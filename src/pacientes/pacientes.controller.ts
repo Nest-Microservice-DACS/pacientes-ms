@@ -4,7 +4,7 @@ import { PacientesService } from './pacientes.service';
 import { CreatePacienteDto } from './dto/create-paciente.dto';
 import { UpdatePacienteDto } from './dto/update-paciente.dto';
 
-@Controller()
+@Controller('pacientes')
 export class PacientesController {
   constructor(private readonly pacientesService: PacientesService) {}
 
@@ -25,12 +25,14 @@ export class PacientesController {
 
   @MessagePattern('updatePaciente')
   update(@Payload() updatePacienteDto: UpdatePacienteDto) {
-    return this.pacientesService.update(updatePacienteDto.id, updatePacienteDto);
+    return this.pacientesService.update(
+      updatePacienteDto.id,
+      updatePacienteDto,
+    );
   }
 
   @MessagePattern('removePaciente')
   remove(@Payload() id: number) {
     return this.pacientesService.remove(id);
   }
-  
 }

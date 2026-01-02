@@ -1,0 +1,26 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Paciente {
+  id        Int            @id @default(autoincrement())
+  nombre    String
+  apellido  String
+  fechaNac  DateTime
+  direccion String
+  telefono  String
+  email     String         @unique
+  status    PacienteStatus @default(ACTIVE)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+enum PacienteStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
