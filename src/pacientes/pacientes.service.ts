@@ -12,17 +12,21 @@ import { connect } from 'http2';
 import { Pool } from 'pg';
 
 @Injectable()
-export class PacientesService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
-  private static pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    user: 'postgres',
-    password:'123456',
-  });
-
-  private static adapter = new PrismaPg(PacientesService.pool);
+export class PacientesService
+  extends PrismaClient
+  implements OnModuleInit, OnModuleDestroy
+{
+  private pool: Pool;
+  private adapter: PrismaPg;
 
   constructor() {
-    super({ adapter: PacientesService.adapter });
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+    });
+    const adapter = new PrismaPg(pool);
+    super({ adapter });
+    this.pool = pool;
+    this.adapter = adapter;
   }
 
   private readonly logger = new Logger(PacientesService.name);

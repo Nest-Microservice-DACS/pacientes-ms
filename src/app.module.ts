@@ -3,7 +3,7 @@ import { PacientesModule } from './pacientes/pacientes.module';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [PacientesModule, ConfigModule.forRoot()],
+  imports: [PacientesModule, ConfigModule.forRoot({isGlobal: true})],
   controllers: [],
   providers: [],
 })
