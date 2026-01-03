@@ -1,7 +1,6 @@
 import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
 import { PacienteStatusList } from '../enum/pacientes.enum';
-import { PacienteStatus } from '@prisma/client';
-
+import { PacienteStatus } from 'generated/prisma/client';
 
 export class CreatePacienteDto {
   @IsString()
@@ -11,7 +10,7 @@ export class CreatePacienteDto {
   apellido: string;
 
   @IsDateString() 
-  fechaNac: Date;
+  fechaNac: string;
 
   @IsString()
   direccion: string;

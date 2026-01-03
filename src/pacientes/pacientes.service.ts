@@ -6,11 +6,24 @@ import {
 } from '@nestjs/common';
 import { CreatePacienteDto } from './dto/create-paciente.dto';
 import { UpdatePacienteDto } from './dto/update-paciente.dto';
-import { PrismaClient } from '@prisma/client';
-
+import { PrismaClient } from 'generated/prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { connect } from 'http2';
+import { Pool } from 'pg';
 
 @Injectable()
-export class PacientesService extends PrismaClient implements OnModuleInit {
+export class PacientesService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+  private static pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    user: 'postgres',
+    password:'123456',
+  });
+
+  private static adapter = new PrismaPg(PacientesService.pool);
+
+  constructor() {
+    super({ adapter: PacientesService.adapter });
+  }
 
   private readonly logger = new Logger(PacientesService.name);
 
