@@ -22,6 +22,6 @@ export class CreatePacienteDto {
   email: string;
 
   @IsOptional()
-  @IsEnum(PacienteStatusList, { message: 'Possible status values are ACTIVE, INACTIVE, SUSPENDED' })
+  @IsEnum(PacienteStatusList, { message: `Possible status values are ${Object.values(PacienteStatusList).join(", ")}` })
   status: PacienteStatus = PacienteStatus.ACTIVE;
 }

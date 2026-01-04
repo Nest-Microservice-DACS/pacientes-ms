@@ -3,6 +3,7 @@ import {
   Logger,
   OnModuleInit,
   OnModuleDestroy,
+  HttpStatus,
 } from '@nestjs/common';
 import { CreatePacienteDto } from './dto/create-paciente.dto';
 import { UpdatePacienteDto } from './dto/update-paciente.dto';
@@ -10,6 +11,8 @@ import { PrismaClient } from 'generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { connect } from 'http2';
 import { Pool } from 'pg';
+import { RpcException } from '@nestjs/microservices';
+import { PacientePaginationDto } from './dto/pacientes-pagination.dto';
 
 @Injectable()
 export class PacientesService
@@ -45,12 +48,43 @@ export class PacientesService
     return this.paciente.create({ data });
   }
 
-  async findAll() {
-    return this.paciente.findMany();
+  async findAll(pacientePaginationDto: PacientePaginationDto) {
+    const totalPages = await this.paciente.count({
+      where: {
+        status: pacientePaginationDto.status,
+      },
+    });
+
+    const currentPage = pacientePaginationDto.page;
+    const pageSize = pacientePaginationDto.size;
+
+    return {
+      data: await this.paciente.findMany({
+        skip: (currentPage - 1) * pageSize,
+        take: pageSize,
+        where: {
+          status: pacientePaginationDto.status,
+        },
+      }),
+      meta: {
+        total: totalPages,
+        page: currentPage,
+        lastPage: Math.ceil(totalPages / pageSize),
+      },
+    };
   }
 
   async findOne(id: number) {
-    return this.paciente.findUnique({ where: { id } });
+    const paciente = await this.paciente.findUnique({ where: { id } });
+
+    if (!paciente) {
+      throw new RpcException({
+        status: HttpStatus.NOT_FOUND,
+        message: `Paciente con ID ${id} no encontrado`,
+      });
+    }
+
+    return paciente;
   }
 
   async update(id: number, data: UpdatePacienteDto) {

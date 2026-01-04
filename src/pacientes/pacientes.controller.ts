@@ -3,6 +3,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { PacientesService } from './pacientes.service';
 import { CreatePacienteDto } from './dto/create-paciente.dto';
 import { UpdatePacienteDto } from './dto/update-paciente.dto';
+import { PacientePaginationDto } from './dto/pacientes-pagination.dto';
 
 @Controller('pacientes')
 export class PacientesController {
@@ -14,8 +15,8 @@ export class PacientesController {
   }
 
   @MessagePattern('findAllPacientes')
-  findAll() {
-    return this.pacientesService.findAll();
+  findAll(@Payload() pacientePaginationDto: PacientePaginationDto) {
+    return this.pacientesService.findAll(pacientePaginationDto);
   }
 
   @MessagePattern('findOnePaciente')
