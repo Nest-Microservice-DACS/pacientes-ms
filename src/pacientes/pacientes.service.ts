@@ -13,6 +13,8 @@ import { connect } from 'http2';
 import { Pool } from 'pg';
 import { RpcException } from '@nestjs/microservices';
 import { PacientePaginationDto } from './dto/pacientes-pagination.dto';
+import { PaginationDto } from 'src/common';
+import { ChangePacienteStatusDto } from './dto';
 
 @Injectable()
 export class PacientesService
@@ -94,7 +96,20 @@ export class PacientesService
     });
   }
 
-  async remove(id: number) {
-    return this.paciente.delete({ where: { id } });
+  async changeStatus(changePacienteStatusDto: ChangePacienteStatusDto) {
+    const { id, status } = changePacienteStatusDto;
+    const paciente = await this.paciente.findUnique({ where: { id } });
+
+    if (!paciente) {
+      throw new RpcException({
+        status: HttpStatus.NOT_FOUND,
+        message: `Paciente con ID ${id} no encontrado`,
+      });
+    }
+    if (paciente.status === status) {
+      return paciente;
+    }
+
+    return this.paciente.update({ where: { id }, data: { status: status } });
   }
 }

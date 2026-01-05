@@ -3,7 +3,8 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { PacientesService } from './pacientes.service';
 import { CreatePacienteDto } from './dto/create-paciente.dto';
 import { UpdatePacienteDto } from './dto/update-paciente.dto';
-import { PacientePaginationDto } from './dto/pacientes-pagination.dto';
+import { ChangePacienteStatusDto, PacientePaginationDto } from './dto';
+
 
 @Controller('pacientes')
 export class PacientesController {
@@ -32,8 +33,8 @@ export class PacientesController {
     );
   }
 
-  @MessagePattern('removePaciente')
-  remove(@Payload() id: number) {
-    return this.pacientesService.remove(id);
+  @MessagePattern('changePacienteStatus')
+  changeStatus(@Payload() statusDto: ChangePacienteStatusDto) {
+    return this.pacientesService.changeStatus(statusDto);
   }
 }

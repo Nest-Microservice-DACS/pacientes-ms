@@ -8,5 +8,5 @@ export class PacientePaginationDto extends PaginationDto {
     @IsEnum(PacienteStatusList, {
         message: `Possible status values are ${PacienteStatusList.join(", ")}`,
     })
-    status?: PacienteStatus;
+    status: PacienteStatus;
 }
