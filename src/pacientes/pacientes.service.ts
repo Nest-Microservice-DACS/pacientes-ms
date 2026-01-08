@@ -76,7 +76,7 @@ export class PacientesService
     };
   }
 
-  async findOne(id: number) {
+  async findById(id: number) {
     const paciente = await this.paciente.findUnique({ where: { id } });
 
     if (!paciente) {

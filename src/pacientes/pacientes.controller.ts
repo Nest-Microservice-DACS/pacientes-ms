@@ -10,22 +10,22 @@ import { ChangePacienteStatusDto, PacientePaginationDto } from './dto';
 export class PacientesController {
   constructor(private readonly pacientesService: PacientesService) {}
 
-  @MessagePattern('createPaciente')
+  @MessagePattern({cmd: 'create_paciente'})
   create(@Payload() createPacienteDto: CreatePacienteDto) {
     return this.pacientesService.create(createPacienteDto);
   }
 
-  @MessagePattern('findAllPacientes')
+  @MessagePattern({cmd: 'find_all_pacientes'})
   findAll(@Payload() pacientePaginationDto: PacientePaginationDto) {
     return this.pacientesService.findAll(pacientePaginationDto);
   }
 
-  @MessagePattern('findOnePaciente')
-  findOne(@Payload() id: number) {
-    return this.pacientesService.findOne(id);
+  @MessagePattern({cmd: 'get_paciente_by_id'})
+  findById(@Payload() id: number){
+    return this.pacientesService.findById(id);
   }
 
-  @MessagePattern('updatePaciente')
+  @MessagePattern({cmd: 'update_paciente'})
   update(@Payload() updatePacienteDto: UpdatePacienteDto) {
     return this.pacientesService.update(
       updatePacienteDto.id,
@@ -33,7 +33,7 @@ export class PacientesController {
     );
   }
 
-  @MessagePattern('changePacienteStatus')
+  @MessagePattern({cmd: 'change_paciente_status'})
   changeStatus(@Payload() statusDto: ChangePacienteStatusDto) {
     return this.pacientesService.changeStatus(statusDto);
   }
