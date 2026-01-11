@@ -9,11 +9,9 @@ import { CreatePacienteDto } from './dto/create-paciente.dto';
 import { UpdatePacienteDto } from './dto/update-paciente.dto';
 import { PrismaClient } from 'generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { connect } from 'http2';
 import { Pool } from 'pg';
 import { RpcException } from '@nestjs/microservices';
 import { PacientePaginationDto } from './dto/pacientes-pagination.dto';
-import { PaginationDto } from 'src/common';
 import { ChangePacienteStatusDto } from './dto';
 
 @Injectable()
