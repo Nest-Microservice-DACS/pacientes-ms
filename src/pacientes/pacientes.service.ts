@@ -45,33 +45,51 @@ export class PacientesService
   }
 
   async create(data: CreatePacienteDto) {
-    return this.paciente.create({ data });
+    try {
+      return await this.paciente.create({ data });
+    } catch (error) {
+      this.logger.error('Error creating paciente', error);
+      throw new RpcException({
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Error creating paciente',
+        error,
+      });
+    }
   }
 
   async findAll(pacientePaginationDto: PacientePaginationDto) {
-    const totalPages = await this.paciente.count({
-      where: {
-        status: pacientePaginationDto.status,
-      },
-    });
-
-    const currentPage = pacientePaginationDto.page;
-    const pageSize = pacientePaginationDto.size;
-
-    return {
-      data: await this.paciente.findMany({
-        skip: (currentPage - 1) * pageSize,
-        take: pageSize,
+    try {
+      const totalPages = await this.paciente.count({
         where: {
           status: pacientePaginationDto.status,
         },
-      }),
-      meta: {
-        total: totalPages,
-        page: currentPage,
-        lastPage: Math.ceil(totalPages / pageSize),
-      },
-    };
+      });
+
+      const currentPage = pacientePaginationDto.page;
+      const pageSize = pacientePaginationDto.size;
+
+      return {
+        data: await this.paciente.findMany({
+          skip: (currentPage - 1) * pageSize,
+          take: pageSize,
+          where: {
+            status: pacientePaginationDto.status,
+          },
+        }),
+        meta: {
+          total: totalPages,
+          page: currentPage,
+          lastPage: Math.ceil(totalPages / pageSize),
+        },
+      };
+    } catch (error) {
+      this.logger.error('Error finding pacientes', error);
+      throw new RpcException({
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Error finding pacientes',
+        error,
+      });
+    }
   }
 
   async findById(id: number) {
@@ -80,7 +98,7 @@ export class PacientesService
     if (!paciente) {
       throw new RpcException({
         status: HttpStatus.NOT_FOUND,
-        message: `Paciente con ID ${id} no encontrado`,
+        message: `Patient with ID ${id} not found`,
       });
     }
 
@@ -88,26 +106,44 @@ export class PacientesService
   }
 
   async update(id: number, data: UpdatePacienteDto) {
-    return this.paciente.update({
-      where: { id },
-      data,
-    });
+    try {
+      return await this.paciente.update({
+        where: { id },
+        data,
+      });
+    } catch (error) {
+      this.logger.error(`Error updating paciente with ID ${id}`, error);
+      throw new RpcException({
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: `Error updating paciente with ID ${id}`,
+        error,
+      });
+    }
   }
 
   async changeStatus(changePacienteStatusDto: ChangePacienteStatusDto) {
     const { id, status } = changePacienteStatusDto;
-    const paciente = await this.paciente.findUnique({ where: { id } });
+    try {
+      const paciente = await this.paciente.findUnique({ where: { id } });
 
-    if (!paciente) {
+      if (!paciente) {
+        throw new RpcException({
+          status: HttpStatus.NOT_FOUND,
+          message: `Patient with ID ${id} not found`,
+        });
+      }
+      if (paciente.status === status) {
+        return paciente;
+      }
+
+      return await this.paciente.update({ where: { id }, data: { status: status } });
+    } catch (error) {
+      this.logger.error(`Error changing status for paciente with ID ${id}`, error);
       throw new RpcException({
-        status: HttpStatus.NOT_FOUND,
-        message: `Paciente con ID ${id} no encontrado`,
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: `Error changing status for paciente with ID ${id}`,
+        error,
       });
     }
-    if (paciente.status === status) {
-      return paciente;
-    }
-
-    return this.paciente.update({ where: { id }, data: { status: status } });
   }
 }

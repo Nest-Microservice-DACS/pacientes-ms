@@ -15,7 +15,7 @@ export class PacientesController {
     return this.pacientesService.create(createPacienteDto);
   }
 
-  @MessagePattern({cmd: 'find_all_pacientes'})
+  @MessagePattern({cmd: 'get_all_pacientes'})
   findAll(@Payload() pacientePaginationDto: PacientePaginationDto) {
     return this.pacientesService.findAll(pacientePaginationDto);
   }
