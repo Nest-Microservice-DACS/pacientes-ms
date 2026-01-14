@@ -32,7 +32,7 @@ export class PacientesController {
       updatePacienteDto,
     );
   }
-
+  
   @MessagePattern({cmd: 'change_paciente_status'})
   changeStatus(@Payload() statusDto: ChangePacienteStatusDto) {
     return this.pacientesService.changeStatus(statusDto);
