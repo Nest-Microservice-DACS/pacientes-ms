@@ -5,17 +5,17 @@ import {
   OnModuleDestroy,
   HttpStatus,
 } from '@nestjs/common';
-import { CreatePacienteDto } from './dto/create-paciente.dto';
-import { UpdatePacienteDto } from './dto/update-paciente.dto';
+import { CreatePatientDto } from './dto/create-patient.dto';
+import { UpdatePatientDto } from './dto/update-patient.dto';
 import { PrismaClient } from 'generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 import { RpcException } from '@nestjs/microservices';
-import { PacientePaginationDto } from './dto/pacientes-pagination.dto';
-import { ChangePacienteStatusDto } from './dto';
+import { PatientPaginationDto } from './dto/patient-pagination.dto';
+import { PatientStatusDto } from './dto';
 
 @Injectable()
-export class PacientesService
+export class PatientService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy
 {
@@ -32,21 +32,21 @@ export class PacientesService
     this.adapter = adapter;
   }
 
-  private readonly logger = new Logger(PacientesService.name);
+  private readonly logger = new Logger(PatientService.name);
 
   async onModuleInit() {
     await this.$connect();
-    this.logger.log('Prisma conectado a la base de datos');
+    this.logger.log('Prisma connected to the database');
   }
 
   async onModuleDestroy() {
     await this.$disconnect();
-    this.logger.log('Prisma desconectado de la base de datos');
+    this.logger.log('Prisma disconnected from the database');
   }
 
-  async create(data: CreatePacienteDto) {
+  async create(data: CreatePatientDto) {
     try {
-      return await this.paciente.create({ data });
+      return await this.patient.create({ data });
     } catch (error) {
       this.logger.error('Error creating paciente', error);
       throw new RpcException({
@@ -57,23 +57,23 @@ export class PacientesService
     }
   }
 
-  async findAll(pacientePaginationDto: PacientePaginationDto) {
+  async findAll(patientPaginationDto: PatientPaginationDto) {
     try {
-      const totalPages = await this.paciente.count({
+      const totalPages = await this.patient.count({
         where: {
-          status: pacientePaginationDto.status,
+          status: patientPaginationDto.status,
         },
       });
 
-      const currentPage = pacientePaginationDto.page;
-      const pageSize = pacientePaginationDto.size;
+      const currentPage = patientPaginationDto.page;
+      const pageSize = patientPaginationDto.size;
 
       return {
-        data: await this.paciente.findMany({
+        data: await this.patient.findMany({
           skip: (currentPage - 1) * pageSize,
           take: pageSize,
           where: {
-            status: pacientePaginationDto.status,
+            status: patientPaginationDto.status,
           },
         }),
         meta: {
@@ -83,65 +83,65 @@ export class PacientesService
         },
       };
     } catch (error) {
-      this.logger.error('Error finding pacientes', error);
+      this.logger.error('Error finding patients', error);
       throw new RpcException({
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Error finding pacientes',
+        message: 'Error finding patients',
         error,
       });
     }
   }
 
   async findById(id: number) {
-    const paciente = await this.paciente.findUnique({ where: { id } });
+    const patient = await this.patient.findUnique({ where: { id } });
 
-    if (!paciente) {
+    if (!patient) {
       throw new RpcException({
         status: HttpStatus.NOT_FOUND,
         message: `Patient with ID ${id} not found`,
       });
     }
 
-    return paciente;
+    return patient;
   }
 
-  async update(id: number, data: UpdatePacienteDto) {
+  async update(id: number, data: UpdatePatientDto) {
     try {
-      return await this.paciente.update({
+      return await this.patient.update({
         where: { id },
         data,
       });
     } catch (error) {
-      this.logger.error(`Error updating paciente with ID ${id}`, error);
+      this.logger.error(`Error updating patient with ID ${id}`, error);
       throw new RpcException({
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Error updating paciente with ID ${id}`,
+        message: `Error updating patient with ID ${id}`,
         error,
       });
     }
   }
 
-  async changeStatus(changePacienteStatusDto: ChangePacienteStatusDto) {
-    const { id, status } = changePacienteStatusDto;
+  async changeStatus(changePacienteStatusDto: PatientStatusDto, id: number) {
+    const { status } = changePacienteStatusDto;
     try {
-      const paciente = await this.paciente.findUnique({ where: { id } });
+      const patient = await this.patient.findUnique({ where: { id } });
 
-      if (!paciente) {
+      if (!patient) {
         throw new RpcException({
           status: HttpStatus.NOT_FOUND,
           message: `Patient with ID ${id} not found`,
         });
       }
-      if (paciente.status === status) {
-        return paciente;
+      if (patient.status === status) {
+        return patient;
       }
 
-      return await this.paciente.update({ where: { id }, data: { status: status } });
+      return await this.patient.update({ where: { id }, data: { status: status } });
     } catch (error) {
-      this.logger.error(`Error changing status for paciente with ID ${id}`, error);
+      this.logger.error(`Error changing status for patient with ID ${id}`, error);
       throw new RpcException({
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Error changing status for paciente with ID ${id}`,
+        message: `Error changing status for patient with ID ${id}`,
         error,
       });
     }
